@@ -8,7 +8,7 @@ import play.api.libs.json.Json
 import play.api.libs.ws.WS
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
-class ShortenUrlSpec
+class ShortenerSpec
   extends PlaySpec with OneServerPerSuite with FutureAwaits with DefaultAwaitTimeout with BeforeAndAfter {
 
   lazy val mongoClient = MongoClient()
@@ -31,14 +31,11 @@ class ShortenUrlSpec
       val response = await(WS.url(url).post(payload))
 
       response.status mustBe 201
-      response.header(HttpHeaders.LOCATION) mustBe 'defined
-
-      val location = response.header(HttpHeaders.LOCATION).get
+      val location = response.header(HttpHeaders.LOCATION).value
 
       location must startWith(baseUrl)
 
-      val relativeLocation: String = location diff baseUrl
-      relativeLocation.foreach { c => c.isLetterOrDigit mustBe true}
+      (location diff baseUrl).foreach { c => c.isLetterOrDigit mustBe true}
     }
 
     "return two different shortened urls for two different urls" in {
@@ -78,6 +75,23 @@ class ShortenUrlSpec
       invalidPayloadResponse.body mustBe 'empty
     }
 
+  }
+
+  "performing a GET on a shortened url" should {
+
+    "return a 301 with the correct location header" in {
+      
+      pending
+
+      val urlToShorten = "http://www.google.com"
+      val shortenUrlResponse = await(WS.url(url).post(requestToShorten(urlToShorten)))
+      val shortenedUrl = shortenUrlResponse.header(HttpHeaders.LOCATION).value
+
+      val response = await(WS.url(shortenedUrl).get())
+
+      response.status mustBe 301
+      response.header(HttpHeaders.LOCATION).value mustBe urlToShorten
+    } 
   }
 
 }
