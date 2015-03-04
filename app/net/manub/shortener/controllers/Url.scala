@@ -26,15 +26,15 @@ object Url extends Controller with MongoController {
       val query = BSONDocument("originalUrl" -> url)
 
       collection.find(query).one[ShortenedUrl].flatMap {
-        case Some(existingShortenedUrl) => resultFor(existingShortenedUrl)
+        case Some(existingShortenedUrl) => created(existingShortenedUrl)
         case None =>
           val shortenedUrl = ShortenedUrl.create(url)
-          collection.insert(shortenedUrl).flatMap(_ => resultFor(shortenedUrl))
+          collection.insert(shortenedUrl).flatMap(_ => created(shortenedUrl))
       }
     }.getOrElse(Future.successful(BadRequest))
   }
 
-  private def resultFor(shortenedUrl: ShortenedUrl)(implicit request: Request[AnyRef]): Future[Result] =
+  private def created(shortenedUrl: ShortenedUrl)(implicit request: Request[AnyRef]): Future[Result] =
     Future.successful(Created.withHeaders(HttpHeaders.LOCATION -> s"http://${request.host}/${shortenedUrl.id}"))
 
 }

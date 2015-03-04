@@ -28,12 +28,12 @@ class ShortenUrlSpec
 
       val payload = Json.obj("url" -> "http://www.google.com")
 
-      val result = await(WS.url(url).post(payload))
+      val response = await(WS.url(url).post(payload))
 
-      result.status mustBe 201
-      result.header(HttpHeaders.LOCATION) mustBe 'defined
+      response.status mustBe 201
+      response.header(HttpHeaders.LOCATION) mustBe 'defined
 
-      val location = result.header(HttpHeaders.LOCATION).get
+      val location = response.header(HttpHeaders.LOCATION).get
 
       location must startWith(baseUrl)
 
@@ -43,11 +43,11 @@ class ShortenUrlSpec
 
     "return two different shortened urls for two different urls" in {
 
-      val firstResult = await(WS.url(url).post(requestToShorten("http://www.google.com")))
-      val secondResult = await(WS.url(url).post(requestToShorten("http://www.bbc.co.uk")))
+      val firstResponse = await(WS.url(url).post(requestToShorten("http://www.google.com")))
+      val secondResponse = await(WS.url(url).post(requestToShorten("http://www.bbc.co.uk")))
 
-      val firstShortenedUrl: Option[String] = firstResult.header(HttpHeaders.LOCATION)
-      val secondShortenedUrl: Option[String] = secondResult.header(HttpHeaders.LOCATION)
+      val firstShortenedUrl: Option[String] = firstResponse.header(HttpHeaders.LOCATION)
+      val secondShortenedUrl: Option[String] = secondResponse.header(HttpHeaders.LOCATION)
 
       firstShortenedUrl mustBe 'defined
       secondShortenedUrl mustBe 'defined
@@ -62,12 +62,20 @@ class ShortenUrlSpec
       shortenedUrl.header(HttpHeaders.LOCATION) mustBe sameUrlShortenedAgain.header(HttpHeaders.LOCATION)
     }
 
-    "return a 400 error when requesting to shorten a non valid url" in {
+    "return a 400 error with empty body when requesting to shorten a non valid url" in {
 
-      val badRequest = await(WS.url(url).post(requestToShorten("not an url")))
+      val invalidUrlResponse = await(WS.url(url).post(requestToShorten("not an url")))
 
-      badRequest.status mustBe 400
-      badRequest.body mustBe 'empty
+      invalidUrlResponse.status mustBe 400
+      invalidUrlResponse.body mustBe 'empty
+    }
+
+    "return a 400 error with empty body when posting an invalid payload" in {
+
+      val invalidPayloadResponse = await(WS.url(url).post(Json.obj("test" -> false)))
+
+      invalidPayloadResponse.status mustBe 400
+      invalidPayloadResponse.body mustBe 'empty
     }
 
   }
