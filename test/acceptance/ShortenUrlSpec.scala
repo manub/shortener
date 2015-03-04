@@ -62,6 +62,14 @@ class ShortenUrlSpec
       shortenedUrl.header(HttpHeaders.LOCATION) mustBe sameUrlShortenedAgain.header(HttpHeaders.LOCATION)
     }
 
+    "return a 400 error when requesting to shorten a non valid url" in {
+
+      val badRequest = await(WS.url(url).post(requestToShorten("not an url")))
+
+      badRequest.status mustBe 400
+      badRequest.body mustBe 'empty
+    }
+
   }
 
 }

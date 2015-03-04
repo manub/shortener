@@ -6,7 +6,7 @@ import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
 class PingSpec extends PlaySpec with OneServerPerSuite with FutureAwaits with DefaultAwaitTimeout {
 
-  "/ping" should {
+  "the ping endpoint" should {
 
     """return a 200 with a "pong" body""" in {
 
