@@ -17,12 +17,15 @@ class ShortenUrlSpec
     mongoClient("shortener")("shortenedUrls").drop()
   }
 
+  val baseUrl = s"http://localhost:$port/"
+  val url = s"${baseUrl}url"
+
+  def requestToShorten(url: String) = Json.obj("url" -> url)
+
   "shortening an url" should {
 
     "return a 201 status with a location header and a 6 characters relative url" in {
 
-      val baseUrl = s"http://localhost:$port/"
-      val url = s"${baseUrl}url"
       val payload = Json.obj("url" -> "http://www.google.com")
 
       val result = await(WS.url(url).post(payload))
@@ -36,6 +39,27 @@ class ShortenUrlSpec
 
       val relativeLocation: String = location diff baseUrl
       relativeLocation.foreach { c => c.isLetterOrDigit mustBe true}
+    }
+
+    "return two different shortened urls for two different urls" in {
+
+      val firstResult = await(WS.url(url).post(requestToShorten("http://www.google.com")))
+      val secondResult = await(WS.url(url).post(requestToShorten("http://www.bbc.co.uk")))
+
+      val firstShortenedUrl: Option[String] = firstResult.header(HttpHeaders.LOCATION)
+      val secondShortenedUrl: Option[String] = secondResult.header(HttpHeaders.LOCATION)
+
+      firstShortenedUrl mustBe 'defined
+      secondShortenedUrl mustBe 'defined
+      firstShortenedUrl must not be secondShortenedUrl
+    }
+
+    "return the same shortened url for requesting to shorten the same url twice" in {
+
+      val shortenedUrl = await(WS.url(url).post(requestToShorten("http://www.google.com")))
+      val sameUrlShortenedAgain = await(WS.url(url).post(requestToShorten("http://www.google.com")))
+
+      shortenedUrl.header(HttpHeaders.LOCATION) mustBe sameUrlShortenedAgain.header(HttpHeaders.LOCATION)
     }
 
   }

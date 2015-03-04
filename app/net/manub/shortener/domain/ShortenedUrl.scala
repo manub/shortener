@@ -7,7 +7,7 @@ case class ShortenedUrl(id: String, originalUrl: String)
 
 object ShortenedUrl {
 
-  implicit val writes = Json.writes[ShortenedUrl]
+  implicit val format = Json.format[ShortenedUrl]
 
   def create(url: String): ShortenedUrl = ShortenedUrl(IdGenerator.generateRandomId, url)
 }
