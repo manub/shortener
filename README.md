@@ -17,7 +17,7 @@ There's also a `/ping` endpoint available, that will simply reply with a `pong` 
 This is just an opportunity for the author to experiment with different tools and frameworks, starting with something really simple. New features may be added from time to time!
 
 ###I want to use it. Is it live?
-The application is currently deployed at http://shortener.manub.net -
+The application is currently deployed at http://shortener.manub.net - have a try.
 
 ###You surely don't want a url shortener without a web interface...
 You're right. There will be one :)
