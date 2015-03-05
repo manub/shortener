@@ -35,11 +35,11 @@ object Url extends Controller with MongoController {
   }
 
   private def created(shortenedUrl: ShortenedUrl)(implicit request: Request[AnyRef]): Future[Result] =
-    Future.successful(Created.withHeaders(HttpHeaders.LOCATION -> s"http://${request.host}/${shortenedUrl.id}"))
+    Future.successful(Created.withHeaders(HttpHeaders.LOCATION -> s"http://${request.host}/${shortenedUrl._id}"))
 
   def go(id: String) = Action.async { implicit request =>
 
-    val query = BSONDocument("id" -> id)
+    val query = BSONDocument("_id" -> id)
 
     collection.find(query).one[ShortenedUrl].flatMap {
       case Some(shortenedUrl) => Future.successful(MovedPermanently(shortenedUrl.originalUrl))

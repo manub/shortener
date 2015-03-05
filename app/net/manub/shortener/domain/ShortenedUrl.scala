@@ -3,7 +3,7 @@ package net.manub.shortener.domain
 import net.manub.shortener.util.IdGenerator
 import play.api.libs.json.Json
 
-case class ShortenedUrl(id: String, originalUrl: String)
+case class ShortenedUrl(_id: String, originalUrl: String)
 
 object ShortenedUrl {
 
