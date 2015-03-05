@@ -1,3 +1,5 @@
 GET         /ping        net.manub.shortener.controllers.Ping.ping
 
 POST        /url         net.manub.shortener.controllers.Url.shorten
+
+GET         /:id         net.manub.shortener.controllers.Url.go(id: String)

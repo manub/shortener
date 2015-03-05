@@ -5,11 +5,11 @@ import java.net.URL
 import com.google.common.net.HttpHeaders
 import net.manub.shortener.domain.ShortenedUrl
 import play.api.libs.json.JsValue
-import play.api.mvc.{Request, Action, Controller, Result}
+import play.api.mvc.{Action, Controller, Request, Result}
 import play.modules.reactivemongo.MongoController
+import play.modules.reactivemongo.json.BSONFormats._
 import play.modules.reactivemongo.json.collection.JSONCollection
 import reactivemongo.bson.BSONDocument
-import play.modules.reactivemongo.json.BSONFormats._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -36,6 +36,17 @@ object Url extends Controller with MongoController {
 
   private def created(shortenedUrl: ShortenedUrl)(implicit request: Request[AnyRef]): Future[Result] =
     Future.successful(Created.withHeaders(HttpHeaders.LOCATION -> s"http://${request.host}/${shortenedUrl.id}"))
+
+  def go(id: String) = Action.async { implicit request =>
+
+    val query = BSONDocument("id" -> id)
+
+    collection.find(query).one[ShortenedUrl].flatMap {
+      case Some(shortenedUrl) => Future.successful(MovedPermanently(shortenedUrl.originalUrl))
+      case None => Future.successful(NotFound)
+    }
+
+  }
 
 }
 

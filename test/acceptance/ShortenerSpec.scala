@@ -81,17 +81,22 @@ class ShortenerSpec
 
     "return a 301 with the correct location header" in {
       
-      pending
-
       val urlToShorten = "http://www.google.com"
       val shortenUrlResponse = await(WS.url(url).post(requestToShorten(urlToShorten)))
       val shortenedUrl = shortenUrlResponse.header(HttpHeaders.LOCATION).value
 
-      val response = await(WS.url(shortenedUrl).get())
+      val response = await(WS.url(shortenedUrl).withFollowRedirects(false).get())
 
       response.status mustBe 301
       response.header(HttpHeaders.LOCATION).value mustBe urlToShorten
-    } 
+    }
+
+    "return a 404 for a URL that hasn't been found" in {
+
+      val response = await(WS.url(s"${baseUrl}ABC").withFollowRedirects(false).get())
+
+      response.status mustBe 404
+    }
   }
 
 }
